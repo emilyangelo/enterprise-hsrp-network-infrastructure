@@ -1,269 +1,120 @@
-# enterprise-hsrp-network-infrastructure
+🌐 Enterprise HSRP Network Infrastructure — Alta Disponibilidade & Redundância de Gateway
 
-🌐 Enterprise HSRP Network Infrastructure
+HSRP VLAN 802.1Q OSPF Router-on-a-Stick DHCP NAT/PAT Network Emulator
 
-Infraestrutura corporativa de alta disponibilidade com HSRP, VLANs, Inter-VLAN Routing, OSPF e arquitetura hierárquica em 3 camadas.
+Console e laboratório de infraestrutura corporativa de redes, desenvolvido para demonstrar alta disponibilidade, redundância de gateway, segmentação por VLAN, roteamento Inter-VLAN e convergência dinâmica através de OSPF.
 
-Projeto de infraestrutura de redes desenvolvido para demonstrar alta disponibilidade, redundância de gateway, segmentação de rede e roteamento dinâmico, utilizando uma arquitetura corporativa baseada em HSRP, VLANs 802.1Q, Router-on-a-Stick, OSPF e NAT/PAT.
+A arquitetura utiliza dois roteadores redundantes com HSRP, um Core Switch e múltiplos switches de acesso, reproduzindo uma topologia corporativa hierárquica com diferentes segmentos de usuários, servidores e dispositivos de infraestrutura.
 
-📌 Visão Geral
+🌐 Visão Geral da Infraestrutura
 
-A topologia foi projetada para proporcionar tolerância a falhas no First-Hop Gateway, isolamento dos domínios de broadcast por departamento e conectividade entre diferentes segmentos da rede corporativa.
+A topologia foi projetada para garantir continuidade de conectividade em caso de falha do gateway principal, utilizando um endereço IP virtual compartilhado entre os roteadores.
 
-A infraestrutura é composta por:
+                         🌐 INTERNET / ISP
+                                │
+                 ┌──────────────┴──────────────┐
+                 │                             │
+        ┌────────▼────────┐           ┌────────▼────────┐
+        │    Router1      │           │    Router2      │
+        │    ACTIVE       │           │    STANDBY      │
+        │ Priority: 110   │           │ Priority: 100   │
+        └────────┬────────┘           └────────┬────────┘
+                 │                             │
+                 └──────────────┬──────────────┘
+                                │
+                         802.1Q TRUNK
+                                │
+                      ┌─────────▼─────────┐
+                      │    CORE SWITCH    │
+                      │      LAYER 2      │
+                      └─────────┬─────────┘
+                                │
+             ┌──────────────────┼──────────────────┐
+             │                  │                  │
+      ┌──────▼──────┐    ┌──────▼──────┐    ┌──────▼──────┐
+      │  ACCESS-01  │    │  ACCESS-02  │    │  ACCESS-03  │
+      │  ADMIN / RH │    │   OPS / FIN │    │ TI / INFRA   │
+      └──────┬──────┘    └──────┬──────┘    └──────┬──────┘
+             │                  │                  │
+          💻 PCs              💻 PCs             🖥️ Servers
+                                                📡 IoT / Wi-Fi
 
-🔄 Redundância de gateway utilizando HSRP
+🚀 Funcionalidades & Recursos
 
-🏢 Segmentação da rede através de VLANs
+⚡ Alta Disponibilidade com HSRP: Router1 opera como gateway ACTIVE com prioridade 110, enquanto Router2 permanece em STANDBY com prioridade 100, utilizando IPs virtuais para os gateways das VLANs.
 
-🔀 Roteamento Inter-VLAN
+🔄 Failover Automático: Em caso de indisponibilidade do roteador principal, o segundo roteador pode assumir o gateway virtual, mantendo a conectividade dos dispositivos da rede.
 
-🌐 Roteamento dinâmico utilizando OSPF
+🔒 Segmentação por VLAN: Separação lógica dos departamentos através de VLANs 802.1Q, reduzindo os domínios de broadcast e organizando a infraestrutura por setores.
 
-🔐 NAT Overload (PAT) para acesso externo
+🌐 Inter-VLAN Routing: Comunicação entre diferentes segmentos da rede através de Router-on-a-Stick e subinterfaces com encapsulamento dot1Q.
 
-📡 Trunks 802.1Q
+📡 Trunking 802.1Q: Enlaces trunk entre o Core e os switches de acesso para transporte de múltiplas VLANs.
 
-📦 DHCP para distribuição automática de endereços
+🧭 Roteamento Dinâmico com OSPF: Convergência das rotas utilizando OSPF na Area 0, permitindo adaptação dinâmica da tabela de roteamento.
 
-📊 Monitoramento de tráfego e dispositivos
+🛒 DHCP Integrado: Distribuição automática de endereços IP, gateways e parâmetros de rede para os dispositivos finais.
 
-🏗️ Arquitetura hierárquica em 3 camadas
+🔐 NAT Overload (PAT): Tradução de endereços privados para permitir comunicação dos dispositivos internos com a rede externa.
 
-⚡ Alta disponibilidade para os gateways corporativos
+📊 Monitoramento de Rede: Análise de throughput, conectividade, estado dos dispositivos, eventos DHCP e comportamento dos enlaces durante os testes.
 
-🏗️ Arquitetura da Rede
+🏢 Segmentação da Rede
+VLAN	Setor	Rede	Gateway Virtual
+10	ADMIN / IoT	10.10.10.0/24	10.10.10.1
+20	RH	10.10.20.0/24	10.10.20.1
+40	FIN / TI	10.10.40.0/24	10.10.40.1
+70	SERVER / WIFI	10.10.70.0/24	10.10.70.1
+🔄 Gateway Redundante
+VLAN	Router1	Router2	HSRP
+10	10.10.10.2	10.10.10.3	10.10.10.1
+20	10.10.20.2	10.10.20.3	10.10.20.1
+40	10.10.40.2	10.10.40.3	10.10.40.1
+70	10.10.70.2	10.10.70.3	10.10.70.1
 
-A topologia segue uma estrutura hierárquica composta por Core Layer e switches de acesso, com dois roteadores atuando como gateways redundantes através do HSRP.
+Router1: 🟢 ACTIVE — Priority 110
+Router2: 🟡 STANDBY — Priority 100
 
-                         ┌───────────────────┐
-                         │    INTERNET/ISP   │
-                         └─────────┬─────────┘
-                                   │
-                    ┌──────────────┴──────────────┐
-                    │                             │
-          ┌─────────▼─────────┐         ┌─────────▼─────────┐
-          │     Router1       │         │      Router2      │
-          │      ACTIVE       │         │     STANDBY       │
-          │ HSRP Priority 110 │         │ HSRP Priority 100│
-          └─────────┬─────────┘         └─────────┬─────────┘
-                    │                             │
-                    └──────────────┬──────────────┘
-                                   │
-                              802.1Q TRUNK
-                                   │
-                         ┌─────────▼─────────┐
-                         │    CORE SWITCH    │
-                         │    Layer 2        │
-                         └─────────┬─────────┘
-                                   │
-             ┌─────────────────────┼─────────────────────┐
-             │                     │                     │
-      ┌──────▼──────┐       ┌──────▼──────┐       ┌──────▼──────┐
-      │  ACCESS-01  │       │  ACCESS-02  │       │  ACCESS-03  │
-      │  Andar 1    │       │  Andar 2    │       │  Andar 3    │
-      │    ADM      │       │    OPS      │       │   INFRA      │
-      └──────┬──────┘       └──────┬──────┘       └──────┬──────┘
-             │                     │                     │
-        ┌────┴────┐           ┌────┴────┐           ┌────┴────┐
-        │         │           │         │           │         │
-      ADMIN      RH          FIN       TI         SERVER     IoT/WiFi
+📊 Testes & Métricas
 
-🖼️ Topologia Implementada
+A infraestrutura foi submetida a testes de conectividade, tráfego e disponibilidade no ambiente de simulação.
 
-Imagem principal do projeto
-
-Coloque aqui uma imagem da topologia completa:
-
-images/01-topologia-geral.png
-
-
-🔄 Alta Disponibilidade — HSRP
-
-O Hot Standby Router Protocol (HSRP) foi utilizado para fornecer redundância do gateway padrão.
-
-O Router1 atua como roteador principal, enquanto o Router2 permanece em estado de standby.
-
-Equipamento	Função	Prioridade	Estado
-Router1	Gateway Principal	110	🟢 ACTIVE
-Router2	Gateway Redundante	100	🟡 STANDBY
-
-O gateway utilizado pelos dispositivos finais é um Virtual IP (VIP). Dessa forma, caso o Router1 apresente uma falha, o Router2 pode assumir o gateway virtual.
-
-Benefícios
-
-🔄 Redundância do primeiro salto
-
-⚡ Failover automático
-
-🛡️ Maior disponibilidade
-
-🚫 Redução do impacto de falhas no gateway
-
-🔧 Preempt configurado no roteador principal
-
-🔒 Segmentação por VLAN
-
-A rede foi dividida em diferentes VLANs para separar os departamentos e reduzir o domínio de broadcast.
-
-VLAN	Departamento	Rede
-10	ADMIN / IoT	10.10.10.0/24
-20	RH	10.10.20.0/24
-40	FIN / TI	10.10.40.0/24
-70	SERVER / WIFI	10.10.70.0/24
-
-A utilização de VLANs permite uma separação lógica dos diferentes setores da organização, facilitando a administração e o controle da infraestrutura.
-
-🌐 Inter-VLAN Routing
-
-O roteamento entre as VLANs é realizado através de Router-on-a-Stick.
-
-Os roteadores utilizam subinterfaces com encapsulamento 802.1Q, permitindo que diferentes VLANs compartilhem o mesmo enlace físico através de um trunk.
-
-Exemplo conceitual:
-
-Router
- │
- └── Interface física
-      │
-      ├── VLAN 10 → 10.10.10.0/24
-      ├── VLAN 20 → 10.10.20.0/24
-      ├── VLAN 40 → 10.10.40.0/24
-      └── VLAN 70 → 10.10.70.0/24
-
-📋 Endereçamento e Gateways Redundantes
-VLAN	Departamento	Router1	Router2	Virtual IP
-10	ADMIN / IoT	10.10.10.2/24	10.10.10.3/24	10.10.10.1
-20	RH	10.10.20.2/24	10.10.20.3/24	10.10.20.1
-40	FIN / TI	10.10.40.2/24	10.10.40.3/24	10.10.40.1
-70	SERVER / WIFI	10.10.70.2/24	10.10.70.3/24	10.10.70.1
-Estado dos roteadores
-VLAN	Router1	Router2
-10	🟢 ACTIVE	🟡 STANDBY
-20	🟢 ACTIVE	🟡 STANDBY
-40	🟢 ACTIVE	🟡 STANDBY
-70	🟢 ACTIVE	🟡 STANDBY
-📡 Trunking 802.1Q
-
-Os enlaces entre o Core e os switches de acesso utilizam 802.1Q Trunking, permitindo o transporte de múltiplas VLANs através de um único enlace físico.
-
-                 CORE SWITCH
-                      │
-          ┌───────────┼───────────┐
-          │           │           │
-       TRUNK        TRUNK       TRUNK
-       802.1Q       802.1Q      802.1Q
-          │           │           │
-       ACCESS-01   ACCESS-02   ACCESS-03
-
-📡 DHCP
-
-A infraestrutura possui serviço de DHCP para automatizar a configuração dos dispositivos finais.
-
-O processo de obtenção do endereço utiliza o fluxo:
-
-DHCP DISCOVER
-      ↓
-DHCP OFFER
-      ↓
-DHCP REQUEST
-      ↓
-DHCP ACK
-
-
-Esse processo permite distribuir automaticamente:
-
-Endereço IP
-
-Máscara de rede
-
-Gateway padrão
-
-Informações necessárias para conectividade dos hosts
-
-🌐 OSPF
-
-O OSPF (Open Shortest Path First) é utilizado como protocolo de roteamento dinâmico.
-
-A infraestrutura utiliza a Área 0 (Backbone Area) para permitir a convergência das rotas.
-
-                OSPF AREA 0
-                     │
-          ┌──────────┴──────────┐
-          │                     │
-       Router1               Router2
-          │                     │
-          └──────────┬──────────┘
-                     │
-                 CORE NETWORK
-
-Características
-
-🔄 Roteamento dinâmico
-
-⚡ Convergência automática
-
-🧭 Seleção dinâmica de rotas
-
-🌐 Backbone através da Area 0
-
-🔐 NAT / PAT
-
-Para permitir o acesso da rede interna à rede externa, foi utilizado NAT Overload (PAT).
-
-O mecanismo permite que múltiplos dispositivos da rede privada compartilhem endereços públicos utilizando diferentes portas de origem.
-
-LAN / VLANs
-    │
-    ▼
- Router
-    │
-   NAT/PAT
-    │
-    ▼
- INTERNET / ISP
-
-📊 Monitoramento e Performance
-
-Durante os testes realizados no ambiente de simulação, foram observados indicadores de desempenho relacionados ao tráfego, conectividade e funcionamento dos dispositivos.
-
-Métricas observadas
+Resultados observados
 
 📈 Throughput de até 1.5 Gbps
 
 📦 Monitoramento de perda de pacotes
 
-🔄 Funcionamento do HSRP
+🔄 Testes de failover HSRP
 
-🌐 Convergência OSPF
+🌐 Verificação da convergência OSPF
 
-📡 Tráfego entre VLANs
+📡 Validação do DHCP/DORA
 
-📋 Processo DHCP/DORA
+🔀 Testes de comunicação Inter-VLAN
 
-🖥️ Estado dos dispositivos
+🔐 Validação de NAT/PAT
 
-Observação: os valores apresentados correspondem aos testes realizados no ambiente de simulação utilizado no projeto.
+🖥️ Monitoramento do estado dos dispositivos
+
+Os valores apresentados correspondem às medições realizadas no ambiente de simulação utilizado para o projeto.
 
 🖼️ Evidências do Projeto
+🌐 Topologia Geral
 
-Esta seção reúne as capturas de tela e evidências da implementação.
+Arquitetura completa da infraestrutura corporativa.
 
-01 — Topologia Geral
+📈 Monitoramento de Tráfego
 
-Visão geral da arquitetura implementada.
+Dashboard utilizado para acompanhamento do tráfego e throughput dos enlaces.
 
-02 — Monitoramento de Tráfego
+📋 DHCP & OSPF
 
-Monitoramento do tráfego e throughput dos enlaces.
+Registros dos processos DHCP/DORA e eventos relacionados ao roteamento.
 
-03 — DHCP e OSPF
+🖥️ Monitoramento NOC
 
-Registros relacionados ao DHCP/DORA e à convergência OSPF.
-
-04 — Monitoramento dos Dispositivos
-
-Painel de monitoramento e estado dos dispositivos.
+Painel de monitoramento dos dispositivos e consumo da infraestrutura.
 
 📁 Estrutura do Projeto
 enterprise-hsrp-network-infrastructure/
@@ -282,93 +133,7 @@ enterprise-hsrp-network-infrastructure/
     ├── 03-registro-eventos-dhcp.png
     └── 04-noc-monitor-dispositivos.png
 
-🚀 Como Replicar a Topologia
-
-Para reproduzir o ambiente no network-emulator.io, siga as etapas abaixo.
-
-1. Criar os dispositivos
-
-Adicione:
-
-Router1
-
-Router2
-
-ISP
-
-Core Switch
-
-Access Switch 01
-
-Access Switch 02
-
-Access Switch 03
-
-Hosts necessários para os testes
-
-2. Conectar os dispositivos
-
-Configure:
-
-Router1 ── WAN ── ISP
-Router2 ── WAN ── ISP
-
-Router1 ── LAN ── CORE
-Router2 ── LAN ── CORE
-
-CORE ── ACCESS-01
-CORE ── ACCESS-02
-CORE ── ACCESS-03
-
-3. Configurar os trunks
-
-Configure os enlaces entre o Core e os switches de acesso como 802.1Q Trunk.
-
-4. Configurar as VLANs
-
-Crie as VLANs:
-
-VLAN 10 → ADMIN / IoT
-VLAN 20 → RH
-VLAN 40 → FIN / TI
-VLAN 70 → SERVER / WIFI
-
-5. Aplicar as configurações
-
-Utilize os arquivos disponíveis na pasta:
-
-/configs
-
-6. Validar a infraestrutura
-
-Realize testes de:
-
-Conectividade entre hosts
-
-Comunicação entre VLANs
-
-DHCP
-
-HSRP
-
-Failover do gateway
-
-OSPF
-
-NAT/PAT
-
-Tráfego e throughput
-
-🧪 Testes de Validação
-Teste	Objetivo	Resultado esperado
-Ping entre hosts	Validar conectividade	✅ Comunicação
-DHCP	Validar atribuição automática	✅ IP recebido
-Inter-VLAN	Validar roteamento	✅ Comunicação
-HSRP	Validar redundância	✅ Failover
-OSPF	Validar roteamento dinâmico	✅ Convergência
-NAT/PAT	Validar saída externa	✅ Acesso externo
-Tráfego	Avaliar desempenho	📊 Monitoramento
-🛠️ Tecnologias e Conceitos
+🧩 Tecnologias & Protocolos
 
 
 
@@ -379,58 +144,51 @@ Tráfego	Avaliar desempenho	📊 Monitoramento
 
 Principais conceitos utilizados:
 
-HSRP
+HSRP · VLAN · 802.1Q · Router-on-a-Stick · Inter-VLAN Routing · OSPF · NAT/PAT · DHCP · Trunking · High Availability
 
-VLAN
+☁️ Como Replicar a Topologia
 
-802.1Q
+Para reproduzir o laboratório no network-emulator.io:
 
-Router-on-a-Stick
+1. Criar Router1 e Router2
+2. Conectar os roteadores ao ISP
+3. Conectar os roteadores ao CORE
+4. Criar as VLANs
+5. Configurar os trunks 802.1Q
+6. Conectar ACCESS-01, ACCESS-02 e ACCESS-03
+7. Aplicar os arquivos de configuração
+8. Validar DHCP e Inter-VLAN Routing
+9. Validar HSRP e realizar teste de failover
+10. Validar OSPF e conectividade externa
+11. Executar os testes de tráfego
 
-Inter-VLAN Routing
+⚙️ Arquivos de Configuração
 
-OSPF
+As configurações individuais dos equipamentos estão disponíveis em:
 
-NAT/PAT
+/configs
 
-DHCP
 
-Trunking
+Router1-ACTIVE.txt → Configuração do gateway principal
 
-Redundância de Gateway
+Router2-STANDBY.txt → Configuração do gateway redundante
 
-Alta disponibilidade
+CORE-SWITCH.txt → VLANs e trunks
 
-Arquitetura hierárquica de redes
+ACCESS-SWITCHES.txt → Portas de acesso e segmentação
 
-🎯 Objetivos do Projeto
+🎯 Objetivo do Projeto
 
-O projeto teve como objetivo demonstrar, em um ambiente de simulação, a implementação de uma infraestrutura corporativa capaz de oferecer:
+Este projeto foi desenvolvido para demonstrar, de forma prática, conceitos fundamentais de infraestrutura de redes corporativas, com foco em:
 
-Alta disponibilidade do gateway;
+Disponibilidade → Redundância → Segmentação → Roteamento → Monitoramento
 
-Segmentação lógica dos departamentos;
+A proposta combina diferentes tecnologias de redes em uma única topologia, simulando um ambiente corporativo com múltiplos departamentos e necessidade de continuidade operacional.
 
-Comunicação controlada entre redes;
+👩‍💻 Autoria & Licença
 
-Roteamento dinâmico;
+Desenvolvido por Emily Ângelo
 
-Distribuição automática de endereços IP;
+Projeto desenvolvido para fins educacionais, acadêmicos e de demonstração de conhecimentos em infraestrutura de redes.
 
-Acesso à rede externa;
-
-Monitoramento da infraestrutura;
-
-Tolerância a falhas no gateway principal.
-
-👩‍💻 Autoria
-
-Emily Ângelo
-
-Projeto acadêmico/prático de infraestrutura de redes.
-
-📄 Licença
-
-Este projeto está disponível para fins educacionais e de demonstração.
-
-<p align="center"> Desenvolvido com foco em redes, alta disponibilidade e infraestrutura corporativa. 🌐 </p>
+<p align="center"> 🌐 <strong>Enterprise HSRP Network Infrastructure</strong><br> High Availability • VLAN Segmentation • Dynamic Routing • Network Monitoring </p>
